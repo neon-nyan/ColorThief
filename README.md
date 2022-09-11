@@ -31,9 +31,3 @@ In this example, we build an 8 color palette.
 var colorThief = new ColorThief();
 colorThief.GetPalette(sourceImage, 8);
 ```
-
-For Xamarin.Forms
-
-```cs
-await CrossColorThief.Current.GetPalette(sourceImage);
-```
