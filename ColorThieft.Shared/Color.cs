@@ -5,13 +5,8 @@ namespace ColorThiefDotNet
     /// <summary>
     ///     Defines a color in RGB space.
     /// </summary>
-    public struct Color
+    public struct CTColor
     {
-        /// <summary>
-        ///     Get or Set the Alpha component value for sRGB.
-        /// </summary>
-        public byte A;
-
         /// <summary>
         ///     Get or Set the Blue component value for sRGB.
         /// </summary>
@@ -31,7 +26,7 @@ namespace ColorThiefDotNet
         ///     Get HSL color.
         /// </summary>
         /// <returns></returns>
-        public HslColor ToHsl()
+        public CTHslColor ToHsl()
         {
             const double toDouble = 1.0 / 255;
             var r = toDouble * R;
@@ -62,33 +57,16 @@ namespace ColorThiefDotNet
 
             var lightness = 0.5 * (max - min);
             var saturation = chroma == 0 ? 0 : chroma / (1 - Math.Abs(2*lightness - 1));
-            HslColor ret;
+            CTHslColor ret;
             ret.H = 60 * h1;
             ret.S = saturation;
             ret.L = lightness;
-            ret.A = toDouble * A;
             return ret;
             // ReSharper restore CompareOfFloatsByEqualityOperator
         }
 
-        public string ToHexString()
-        {
-            return "#" + R.ToString("X2") + G.ToString("X2") + B.ToString("X2");
-        }
+        public string ToHexString() => "#" + R.ToString("X2") + G.ToString("X2") + B.ToString("X2");
 
-        public string ToHexAlphaString()
-        {
-            return "#" + A.ToString("X2") + R.ToString("X2") + G.ToString("X2") + B.ToString("X2");
-        }
-
-        public override string ToString()
-        {
-            if(A == 255)
-            {
-                return ToHexString();
-            }
-
-            return ToHexAlphaString();
-        }
+        public override string ToString() => ToHexString();
     }
 }

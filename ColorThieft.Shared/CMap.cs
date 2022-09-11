@@ -18,14 +18,27 @@ namespace ColorThiefDotNet
             vboxes.Add(box);
         }
 
-        public List<QuantizedColor> GeneratePalette()
+        public IEnumerable<QuantizedColor> GeneratePalette()
         {
-            if(palette == null)
+            foreach (var vbox in vboxes)
             {
-                palette = (from vBox in vboxes
-                    let rgb = vBox.Avg(false)
-                    let color = FromRgb(rgb[0], rgb[1], rgb[2])
-                    select new QuantizedColor(color, vBox.Count(false))).ToList();
+                var rgb = vbox.Avg(false);
+                var color = FromRgb(rgb[0], rgb[1], rgb[2]);
+                yield return new QuantizedColor(color, vbox.Count(false));
+            }
+        }
+
+        public List<QuantizedColor> GeneratePaletteList()
+        {
+            if (palette == null)
+            {
+                palette = new List<QuantizedColor>();
+                foreach (var vbox in vboxes)
+                {
+                    var rgb = vbox.Avg(false);
+                    var color = FromRgb(rgb[0], rgb[1], rgb[2]);
+                    palette.Add(new QuantizedColor(color, vbox.Count(false)));
+                }
             }
 
             return palette;
@@ -95,11 +108,10 @@ namespace ColorThiefDotNet
             return max;
         }
 
-        public Color FromRgb(int red, int green, int blue)
+        public CTColor FromRgb(int red, int green, int blue)
         {
-            var color = new Color
+            var color = new CTColor
             {
-                A = 255,
                 R = (byte)red,
                 G = (byte)green,
                 B = (byte)blue

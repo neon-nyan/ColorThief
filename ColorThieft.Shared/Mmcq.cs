@@ -28,7 +28,7 @@ namespace ColorThiefDotNet
         /// </summary>
         /// <param name="pixels">The pixels.</param>
         /// <returns>Histo (1-d array, giving the number of pixels in each quantized region of color space), or null on error.</returns>
-        private static int[] GetHisto(IEnumerable<byte[]> pixels)
+        private static int[] GetHisto(byte[][] pixels)
         {
             var histo = new int[Histosize];
 
@@ -122,7 +122,7 @@ namespace ColorThiefDotNet
 
                     var d2 = left <= right
                         ? Math.Min(vboxDim2 - 1, Math.Abs(i + right / 2))
-                        : Math.Max(vboxDim1, Math.Abs(Convert.ToInt32(i - 1 - left / 2.0)));
+                        : Math.Max(vboxDim1, Math.Abs((int)(i - 1 - left / 2.0)));
 
                     // avoid 0-count boxes
                     while(d2 < 0 || partialsum[d2] <= 0)

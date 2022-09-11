@@ -96,9 +96,9 @@ namespace ColorThiefDotNet
                             var histoindex = Mmcq.GetColorIndex(i, j, k);
                             var hval = histo[histoindex];
                             ntot += hval;
-                            rsum += Convert.ToInt32((hval * (i + 0.5) * Mmcq.Mult));
-                            gsum += Convert.ToInt32((hval * (j + 0.5) * Mmcq.Mult));
-                            bsum += Convert.ToInt32((hval * (k + 0.5) * Mmcq.Mult));
+                            rsum += (int)(hval * (i + 0.5) * Mmcq.Mult);
+                            gsum += (int)(hval * (j + 0.5) * Mmcq.Mult);
+                            bsum += (int)(hval * (k + 0.5) * Mmcq.Mult);
                         }
                     }
                 }

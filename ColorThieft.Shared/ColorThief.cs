@@ -7,7 +7,7 @@ namespace ColorThiefDotNet
         public const int DefaultColorCount = 5;
         public const int DefaultQuality = 10;
         public const bool DefaultIgnoreWhite = true;
-        public const int ColorDepth = 4;
+        public const int ColorDepth = 3;
 
         /// <summary>
         ///     Use the median cut algorithm to cluster similar colors.
@@ -31,8 +31,6 @@ namespace ColorThiefDotNet
 
         private byte[][] ConvertPixels(byte[] pixels, int pixelCount, int quality, bool ignoreWhite)
         {
-            
-
             var expectedDataLength = pixelCount * ColorDepth;
             if(expectedDataLength != pixels.Length)
             {
@@ -58,10 +56,9 @@ namespace ColorThiefDotNet
                 var b = pixels[offset];
                 var g = pixels[offset + 1];
                 var r = pixels[offset + 2];
-                var a = pixels[offset + 3];
 
                 // If pixel is mostly opaque and not white
-                if(a >= 125 && !(ignoreWhite && r > 250 && g > 250 && b > 250))
+                if(!(ignoreWhite && r > 250 && g > 250 && b > 250))
                 {
                     pixelArray[numUsedPixels] = new[] {r, g, b};
                     numUsedPixels++;
