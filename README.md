@@ -12,18 +12,11 @@ https://www.nuget.org/packages/ksemenenko.ColorThief/
 ## NuGet for Xamarin Forms only:
 https://www.nuget.org/packages/ksemenenko.ColorThief.Forms/
 
-### Platforms:
-|Platform|Supported|Version|
-| ------------------- | :-----------: | :------------------: |
-|Xamarin.iOS|Yes|iOS 6+|
-|Xamarin.Android|Yes|API 10+|
-|Windows 10 UWP|Yes|10+|
-|Windows Phone 8|No|8.0+|
-|Windows Phone 8.1|No|8.1+|
-|Windows Store|No|8.1+|
-|Xamarin.Mac|No||
-|Desktop .NET 4.5|Yes||
-|Desktop .NET 4.6|Yes||
+### Targets:
+|Target|Supported Framework|
+| ------------------- | :-----------: |
+|.NET Standard 2.0|.NET Framework (4.6.1 - 4.8) & .NET Core (2.0 - 7.0)|
+|.NET Standard 2.1|.NET Core (2.0 - 7.0)|
 
 ## How to use
 
