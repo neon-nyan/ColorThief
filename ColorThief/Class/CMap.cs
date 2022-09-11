@@ -51,7 +51,7 @@ namespace ColorThiefDotNet
 
         public int[] Map(int[] color)
         {
-            foreach(var vbox in vboxes.Where(vbox => vbox.Contains(color)))
+            foreach (var vbox in vboxes.Where(vbox => vbox.Contains(color)))
             {
                 return vbox.Avg(false);
             }
@@ -63,13 +63,13 @@ namespace ColorThiefDotNet
             var d1 = double.MaxValue;
             int[] pColor = null;
 
-            foreach(var t in vboxes)
+            foreach (var t in vboxes)
             {
                 var vbColor = t.Avg(false);
                 var d2 = Math.Sqrt(Math.Pow(color[0] - vbColor[0], 2)
                                    + Math.Pow(color[1] - vbColor[1], 2)
                                    + Math.Pow(color[2] - vbColor[2], 2));
-                if(d2 < d1)
+                if (d2 < d1)
                 {
                     d1 = d2;
                     pColor = vbColor;
@@ -84,20 +84,20 @@ namespace ColorThiefDotNet
             double maxValue = 0;
             var highestPopulation = vboxes.Select(p => p.Count(false)).Max();
 
-            foreach(var swatch in vboxes)
+            foreach (var swatch in vboxes)
             {
                 var avg = swatch.Avg(false);
                 var hsl = FromRgb(avg[0], avg[1], avg[2]).ToHsl();
                 var sat = hsl.S;
                 var luma = hsl.L;
 
-                if(sat >= minSaturation && sat <= maxSaturation &&
+                if (sat >= minSaturation && sat <= maxSaturation &&
                    luma >= minLuma && luma <= maxLuma)
                 {
                     var thisValue = Mmcq.CreateComparisonValue(sat, targetSaturation, luma, targetLuma,
                         swatch.Count(false), highestPopulation);
 
-                    if(max == null || thisValue > maxValue)
+                    if (max == null || thisValue > maxValue)
                     {
                         max = swatch;
                         maxValue = thisValue;

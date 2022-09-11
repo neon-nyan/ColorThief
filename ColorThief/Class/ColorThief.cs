@@ -32,7 +32,7 @@ namespace ColorThiefDotNet
         private byte[][] ConvertPixels(byte[] pixels, int pixelCount, int quality, bool ignoreWhite)
         {
             var expectedDataLength = pixelCount * ColorDepth;
-            if(expectedDataLength != pixels.Length)
+            if (expectedDataLength != pixels.Length)
             {
                 throw new ArgumentException("(expectedDataLength = "
                                             + expectedDataLength + ") != (pixels.length = "
@@ -50,7 +50,7 @@ namespace ColorThiefDotNet
             var numUsedPixels = 0;
             var pixelArray = new byte[numRegardedPixels][];
 
-            for(var i = 0; i < pixelCount; i += quality)
+            for (var i = 0; i < pixelCount; i += quality)
             {
                 var offset = i * ColorDepth;
                 var b = pixels[offset];
@@ -58,9 +58,9 @@ namespace ColorThiefDotNet
                 var r = pixels[offset + 2];
 
                 // If pixel is mostly opaque and not white
-                if(!(ignoreWhite && r > 250 && g > 250 && b > 250))
+                if (!(ignoreWhite && r > 250 && g > 250 && b > 250))
                 {
-                    pixelArray[numUsedPixels] = new[] {r, g, b};
+                    pixelArray[numUsedPixels] = new[] { r, g, b };
                     numUsedPixels++;
                 }
             }
