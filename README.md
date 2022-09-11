@@ -1,3 +1,6 @@
+### Disclaimer
+This is a fork from the original repo by [**KSemenenko**](https://github.com/KSemenenko/ColorThief). This fork simplifies the target build for all .NET related platforms by just splitting the target into **.NET Standard 2.0** and **.NET Standard 2.1**.
+
 # Color Thief .NET
 
 A code for grabbing the color palette from an image. Uses C# and .NET to make it happen.
@@ -5,12 +8,6 @@ A code for grabbing the color palette from an image. Uses C# and .NET to make it
 ### This is a ported project of [Color Thief](https://github.com/lokesh/color-thief/) 
 
 Many thanks for C# code [UWP Version](https://gist.github.com/zumicts/c5050a36e4ba742dc244)
-
-## Available at NuGet. 
-https://www.nuget.org/packages/ksemenenko.ColorThief/
-
-## NuGet for Xamarin Forms only:
-https://www.nuget.org/packages/ksemenenko.ColorThief.Forms/
 
 ### Targets:
 |Target|Supported Framework|
