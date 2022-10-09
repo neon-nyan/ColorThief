@@ -4,7 +4,6 @@
 		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
 		<Platforms>x64</Platforms>
 		<Configurations>Debug;Release;Publish</Configurations>
-		<DebugType>embedded</DebugType>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
