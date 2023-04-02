@@ -20,16 +20,14 @@ namespace ColorThiefDotNet
         /// <returns></returns>
         public QuantizedColor GetColor(Bitmap sourceImage, int quality = DefaultQuality, bool ignoreWhite = DefaultIgnoreWhite)
         {
-            var palette = GetPaletteEnumeration(sourceImage, 3, quality, ignoreWhite);
+            IEnumerable<QuantizedColor> palette = GetPaletteEnumeration(sourceImage, 3, quality, ignoreWhite);
 
-            var dominantColor = new QuantizedColor(new CTColor
+            return new QuantizedColor(new CTColor
             {
                 R = (byte)palette.Average(a => a.Color.R),
                 G = (byte)palette.Average(a => a.Color.G),
                 B = (byte)palette.Average(a => a.Color.B)
             }, (int)palette.Average(a => a.Population));
-
-            return dominantColor;
         }
 
         /// <summary>
@@ -65,12 +63,9 @@ namespace ColorThiefDotNet
         /// <code>true</code>
         public IEnumerable<QuantizedColor> GetPaletteEnumeration(Bitmap sourceImage, int colorCount = DefaultColorCount, int quality = DefaultQuality, bool ignoreWhite = DefaultIgnoreWhite)
         {
-            var pixelArray = GetPixelsFast(sourceImage, quality, ignoreWhite);
-            var cmap = GetColorMap(pixelArray, colorCount);
-            if (cmap != null)
-                return cmap.GeneratePalette();
-
-            return new QuantizedColor[0];
+            byte[][] pixelArray = GetPixels(sourceImage, quality < 1 ? DefaultQuality : quality, ignoreWhite);
+            CMap cmap = GetColorMap(pixelArray, colorCount);
+            return cmap.GeneratePalette();
         }
 
         /// <summary>
@@ -89,53 +84,9 @@ namespace ColorThiefDotNet
         /// <code>true</code>
         public List<QuantizedColor> GetPaletteList(Bitmap sourceImage, int colorCount = DefaultColorCount, int quality = DefaultQuality, bool ignoreWhite = DefaultIgnoreWhite)
         {
-            var pixelArray = GetPixelsFast(sourceImage, quality, ignoreWhite);
-            var cmap = GetColorMap(pixelArray, colorCount);
-            if (cmap != null)
-                return cmap.GeneratePaletteList();
-
-            return new List<QuantizedColor>();
-        }
-
-        private byte[][] GetPixelsFast(Bitmap sourceImage, int quality, bool ignoreWhite)
-        {
-            if (quality < 1)
-            {
-                quality = DefaultQuality;
-            }
-
-            var pixels = GetIntFromPixel(sourceImage);
-            var pixelCount = sourceImage.Width * sourceImage.Height;
-
-            return ConvertPixels(pixels, pixelCount, quality, ignoreWhite);
-        }
-
-        private byte[] GetIntFromPixel(Bitmap bmp)
-        {
-            var pixelList = new byte[bmp.Width * bmp.Height * ColorDepth];
-            int count = 0;
-
-            for (var x = 0; x < bmp.Width; x++)
-            {
-                for (var y = 0; y < bmp.Height; y++)
-                {
-                    var clr = bmp.GetPixel(x, y);
-
-                    pixelList[count] = clr.B;
-                    count++;
-
-                    pixelList[count] = clr.G;
-                    count++;
-
-                    pixelList[count] = clr.R;
-                    count++;
-
-                    // pixelList[count] = clr.A;
-                    // count++;
-                }
-            }
-
-            return pixelList;
+            byte[][] pixelArray = GetPixels(sourceImage, quality < 1 ? DefaultQuality : quality, ignoreWhite);
+            CMap cmap = GetColorMap(pixelArray, colorCount);
+            return cmap.GeneratePaletteList();
         }
     }
 }

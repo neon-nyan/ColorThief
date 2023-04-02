@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Drawing;
 
 namespace ColorThiefDotNet
 {
@@ -25,50 +26,56 @@ namespace ColorThiefDotNet
                 --colorCount;
             }
 
-            var cmap = Mmcq.Quantize(pixelArray, colorCount);
-            return cmap;
+            return Mmcq.Quantize(pixelArray, colorCount);
         }
 
-        private byte[][] ConvertPixels(byte[] pixels, int pixelCount, int quality, bool ignoreWhite)
+        private byte[][] GetPixels(Bitmap sourceImage, int quality, bool ignoreWhite)
         {
-            var expectedDataLength = pixelCount * ColorDepth;
-            if (expectedDataLength != pixels.Length)
-            {
-                throw new ArgumentException("(expectedDataLength = "
-                                            + expectedDataLength + ") != (pixels.length = "
-                                            + pixels.Length + ")");
-            }
+            int imgWidth = sourceImage.Width;
+            int imgHeight = sourceImage.Height;
+            int pixelCount = imgWidth * imgHeight;
 
             // Store the RGB values in an array format suitable for quantize
             // function
 
             // numRegardedPixels must be rounded up to avoid an
             // ArrayIndexOutOfBoundsException if all pixels are good.
+            int numRegardedPixels = (pixelCount + quality - 1) / quality;
 
-            var numRegardedPixels = (pixelCount + quality - 1) / quality;
+            int numUsedPixels = 0;
+            byte[][] pixelArray = new byte[numRegardedPixels][];
 
-            var numUsedPixels = 0;
-            var pixelArray = new byte[numRegardedPixels][];
+            int xstartOffset = 0;
 
-            for (var i = 0; i < pixelCount; i += quality)
+            for (int y = 0; y < imgHeight; y++)
             {
-                var offset = i * ColorDepth;
-                var b = pixels[offset];
-                var g = pixels[offset + 1];
-                var r = pixels[offset + 2];
-
-                // If pixel is mostly opaque and not white
-                if (!(ignoreWhite && r > 250 && g > 250 && b > 250))
+                for (int x = 0 + (Math.Max(imgWidth, xstartOffset) - imgWidth); x < imgWidth; x += quality, xstartOffset = x)
                 {
-                    pixelArray[numUsedPixels] = new[] { r, g, b };
-                    numUsedPixels++;
+                    Color pixel = sourceImage.GetPixel(x, y);
+                    byte r = pixel.R;
+                    byte g = pixel.G;
+                    byte b = pixel.B;
+
+                    // If pixel is mostly opaque and not white
+                    if (!(ignoreWhite && r > 250 && g > 250 && b > 250))
+                    {
+                        pixelArray[numUsedPixels] = new[] { r, g, b };
+                        numUsedPixels++;
+                    }
                 }
             }
 
-            // Remove unused pixels from the array
-            var copy = new byte[numUsedPixels][];
-            Array.Copy(pixelArray, copy, numUsedPixels);
-            return copy;
+            if (ignoreWhite)
+            {
+                // Remove unused pixels from the array
+                byte[][] copy = new byte[numUsedPixels][];
+                Array.Copy(pixelArray, copy, numUsedPixels);
+                return copy;
+            }
+            else
+            {
+                return pixelArray;
+            }
         }
     }
 }

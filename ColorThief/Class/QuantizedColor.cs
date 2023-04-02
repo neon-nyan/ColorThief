@@ -2,7 +2,11 @@
 
 namespace ColorThiefDotNet
 {
+#if NETCOREAPP
+    public struct QuantizedColor
+#else
     public class QuantizedColor
+#endif
     {
         public QuantizedColor(CTColor color, int population)
         {
