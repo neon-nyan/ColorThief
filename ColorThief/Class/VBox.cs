@@ -6,7 +6,7 @@ namespace ColorThiefDotNet
     /// <summary>
     ///     3D color space box.
     /// </summary>
-#if NETCOREAPP
+#if NETCOREAPP && NET7_0_OR_GREATER
     internal struct VBox
 #else
     internal class VBox
@@ -22,7 +22,7 @@ namespace ColorThiefDotNet
         public int R1;
         public int R2;
         private int? volume;
-#if NETCOREAPP
+#if NETCOREAPP && NET7_0_OR_GREATER
         public bool isDummy = true;
 #endif
 
@@ -36,7 +36,7 @@ namespace ColorThiefDotNet
             B2 = b2;
 
             this.histo = histo;
-#if NETCOREAPP
+#if NETCOREAPP && NET7_0_OR_GREATER
             this.isDummy = false;
 #endif
         }

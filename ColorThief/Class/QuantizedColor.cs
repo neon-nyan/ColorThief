@@ -2,7 +2,7 @@
 
 namespace ColorThiefDotNet
 {
-#if NETCOREAPP
+#if NETCOREAPP && NET7_0_OR_GREATER
     public struct QuantizedColor
 #else
     public class QuantizedColor

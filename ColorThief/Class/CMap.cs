@@ -5,7 +5,7 @@ namespace ColorThiefDotNet
     /// <summary>
     ///     Color map
     /// </summary>
-#if NETCOREAPP
+#if NETCOREAPP && NET7_0_OR_GREATER
     internal struct CMap
 #else
     internal class CMap

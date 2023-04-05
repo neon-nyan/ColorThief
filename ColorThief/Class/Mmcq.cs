@@ -144,7 +144,7 @@ namespace ColorThiefDotNet
             }
             if (vbox.Count(false) == 1)
             {
-#if NETCOREAPP
+#if NETCOREAPP && NET7_0_OR_GREATER
                 return new[] { vbox.Clone(), new VBox() };
 #else
                 return new[] { vbox.Clone(), null };
@@ -271,7 +271,7 @@ namespace ColorThiefDotNet
                 VBox vbox1 = vboxes[0];
                 VBox vbox2 = vboxes[1];
 
-#if NETCOREAPP
+#if NETCOREAPP && NET7_0_OR_GREATER
                 if (vbox1.isDummy)
 #else
                 if (vbox1 == null)
@@ -283,7 +283,7 @@ namespace ColorThiefDotNet
 
                 lh.Add(vbox1);
 
-#if NETCOREAPP
+#if NETCOREAPP && NET7_0_OR_GREATER
                 if (!vbox2.isDummy)
 #else
                 if (vbox2 != null)
