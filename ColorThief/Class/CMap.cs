@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Drawing;
 
 namespace ColorThiefDotNet
 {
@@ -26,8 +27,8 @@ namespace ColorThiefDotNet
         {
             foreach (VBox vbox in vboxes)
             {
-                int[] rgb = vbox.Avg(false);
-                CTColor color = FromRgb(rgb[0], rgb[1], rgb[2]);
+                int rgb = vbox.Avg(false);
+                Color color = Color.FromArgb((byte)(rgb >> 16 & 0xFF), (byte)(rgb >> 8 & 0xFF), (byte)(rgb >> 0 & 0xFF));
                 yield return new QuantizedColor(color, vbox.Count(false));
             }
         }
@@ -39,15 +40,13 @@ namespace ColorThiefDotNet
                 palette = new List<QuantizedColor>();
                 foreach (VBox vbox in vboxes)
                 {
-                    int[] rgb = vbox.Avg(false);
-                    CTColor color = FromRgb(rgb[0], rgb[1], rgb[2]);
+                    int rgb = vbox.Avg(false);
+                    Color color = Color.FromArgb((byte)(rgb >> 16 & 0xFF), (byte)(rgb >> 8 & 0xFF), (byte)(rgb >> 0 & 0xFF));
                     palette.Add(new QuantizedColor(color, vbox.Count(false)));
                 }
             }
 
             return palette;
         }
-
-        public CTColor FromRgb(int red, int green, int blue) => new CTColor { R = (byte)red, G = (byte)green, B = (byte)blue };
     }
 }

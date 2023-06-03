@@ -1,8 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace ColorThiefDotNet
 {
+    internal ref struct VBoxesRef
+    {
+        public VBoxesRef(VBox vbox1, VBox vbox2)
+        {
+            VBox1 = vbox1;
+            VBox2 = vbox2;
+        }
+
+        public readonly VBox VBox1;
+        public readonly VBox VBox2;
+    }
+
     internal static class Mmcq
     {
         public const int Sigbits = 5;
@@ -15,69 +28,29 @@ namespace ColorThiefDotNet
         public const double WeightSaturation = 3d;
         public const double WeightLuma = 6d;
         public const double WeightPopulation = 1d;
+
+        private static readonly int[] EmptyVboxLengthArray = Enumerable.Repeat(-1, VboxLength).ToArray();
         private static readonly VBoxComparer ComparatorProduct = new VBoxComparer();
         private static readonly VBoxCountComparer ComparatorCount = new VBoxCountComparer();
 
         public static int GetColorIndex(int r, int g, int b) => (r << (2 * Sigbits)) + (g << Sigbits) + b;
 
-        private static VBox VboxFromPixels(byte[][] pixels, int[] histo)
-        {
-            int rmin = 1000000, rmax = 0;
-            int gmin = 1000000, gmax = 0;
-            int bmin = 1000000, bmax = 0;
-
-            // find min/max
-            int numPixels = pixels.Length;
-            for (int i = 0; i < numPixels; i++)
-            {
-                byte[] pixel = pixels[i];
-                int rval = pixel[0] >> Rshift;
-                int gval = pixel[1] >> Rshift;
-                int bval = pixel[2] >> Rshift;
-
-                if (rval < rmin)
-                {
-                    rmin = rval;
-                }
-                else if (rval > rmax)
-                {
-                    rmax = rval;
-                }
-
-                if (gval < gmin)
-                {
-                    gmin = gval;
-                }
-                else if (gval > gmax)
-                {
-                    gmax = gval;
-                }
-
-                if (bval < bmin)
-                {
-                    bmin = bval;
-                }
-                else if (bval > bmax)
-                {
-                    bmax = bval;
-                }
-            }
-
-            return new VBox(rmin, rmax, gmin, gmax, bmin, bmax, histo);
-        }
-
-        private static VBox[] DoCut(char color, VBox vbox, int[] partialsum, int[] lookaheadsum, int total)
+#if NETCOREAPP
+        private static VBoxesRef DoCut(int color, VBox vbox, ReadOnlySpan<int> partialsum, ReadOnlySpan<int> lookaheadsum, int total)
+#else
+        private static VBoxesRef DoCut(int color, VBox vbox, in int[] partialsum, in int[] lookaheadsum, int total)
+#endif
         {
             int vboxDim1;
             int vboxDim2;
 
             switch (color)
             {
-                case 'r':
+                case 0:
                     vboxDim1 = vbox.R1;
                     vboxDim2 = vbox.R2;
                     break;
-                case 'g':
+                case 1:
                     vboxDim1 = vbox.G1;
                     vboxDim2 = vbox.G2;
                     break;
@@ -115,11 +88,11 @@ namespace ColorThiefDotNet
                     // set dimensions
                     switch (color)
                     {
-                        case 'r':
+                        case 0:
                             vbox1.R2 = d2;
                             vbox2.R1 = d2 + 1;
                             break;
-                        case 'g':
+                        case 1:
                             vbox1.G2 = d2;
                             vbox2.G1 = d2 + 1;
                             break;
@@ -128,29 +101,22 @@ namespace ColorThiefDotNet
                             vbox2.B1 = d2 + 1;
                             break;
                     }
+                    vbox1.count = partialsum[d2];
+                    vbox2.count = lookaheadsum[d2];
 
-                    return new[] { vbox1, vbox2 };
+                    return new VBoxesRef(vbox1, vbox2);
                 }
             }
 
             throw new Exception("VBox can't be cut");
         }
 
-        private static VBox[] MedianCutApply(int[] histo, VBox vbox)
-        {
-            if (vbox.Count(false) == 0)
-            {
-                return null;
-            }
-            if (vbox.Count(false) == 1)
-            {
-#if NETCOREAPP && NET7_0_OR_GREATER
-                return new[] { vbox.Clone(), new VBox() };
+#if NETCOREAPP
+        private static VBoxesRef MedianCutApply(ReadOnlySpan<int> histo, VBox vbox)
 #else
-                return new[] { vbox.Clone(), null };
+        private static VBoxesRef MedianCutApply(in int[] histo, VBox vbox)
 #endif
-            }
-
+        {
             // only one pixel, no split
 
             int rw = vbox.R2 - vbox.R1 + 1;
@@ -160,19 +126,25 @@ namespace ColorThiefDotNet
 
             // Find the partial sum arrays along the selected axis.
             int total = 0;
-            int[] partialsum = new int[VboxLength];
-            // -1 = not set / 0 = 0
-            for (int l = 0; l < partialsum.Length; l++)
-            {
-                partialsum[l] = -1;
-            }
 
             // -1 = not set / 0 = 0
+#if NETCOREAPP
+            Span<int> partialsum = new int[VboxLength];
+            partialsum.Fill(-1);
+#else
+            int[] partialsum = new int[VboxLength];
+            Array.Copy(EmptyVboxLengthArray, partialsum, VboxLength);
+#endif
+
+
+            // -1 = not set / 0 = 0
+#if NETCOREAPP
+            Span<int> lookaheadsum = new int[VboxLength];
+            lookaheadsum.Fill(-1);
+#else
             int[] lookaheadsum = new int[VboxLength];
-            for (int l = 0; l < lookaheadsum.Length; l++)
-            {
-                lookaheadsum[l] = -1;
-            }
+            Array.Copy(EmptyVboxLengthArray, lookaheadsum, VboxLength);
+#endif
 
             int i, j, k, sum, index;
 
@@ -237,8 +209,8 @@ namespace ColorThiefDotNet
             }
 
             // determine the cut planes
-            return maxw == rw ? DoCut('r', vbox, partialsum, lookaheadsum, total) : maxw == gw
-                    ? DoCut('g', vbox, partialsum, lookaheadsum, total) : DoCut('b', vbox, partialsum, lookaheadsum, total);
+            return maxw == rw ? DoCut(0, vbox, partialsum, lookaheadsum, total) : maxw == gw
+                    ? DoCut(1, vbox, partialsum, lookaheadsum, total) : DoCut(2, vbox, partialsum, lookaheadsum, total);
         }
 
         /// <summary>
@@ -249,7 +221,11 @@ namespace ColorThiefDotNet
         /// <param name="target">The target.</param>
         /// <param name="histo">The histo.</param>
         /// <exception cref="System.Exception">vbox1 not defined; shouldn't happen!</exception>
+#if NETCOREAPP
+        private static void Iter(List<VBox> lh, IComparer<VBox> comparator, int target, ReadOnlySpan<int> histo)
+#else
         private static void Iter(List<VBox> lh, IComparer<VBox> comparator, int target, int[] histo)
+#endif
         {
             int ncolors = 1;
             int niters = 0;
@@ -257,6 +233,7 @@ namespace ColorThiefDotNet
             while (niters < MaxIterations)
             {
                 VBox vbox = lh[lh.Count - 1];
+
                 if (vbox.Count(false) == 0)
                 {
                     lh.Sort(comparator);
@@ -267,29 +244,19 @@ namespace ColorThiefDotNet
                 lh.RemoveAt(lh.Count - 1);
 
                 // do the cut
-                VBox[] vboxes = MedianCutApply(histo, vbox);
-                VBox vbox1 = vboxes[0];
-                VBox vbox2 = vboxes[1];
+                VBoxesRef vboxesRef = MedianCutApply(histo, vbox);
 
-#if NETCOREAPP && NET7_0_OR_GREATER
-                if (vbox1.isDummy)
-#else
-                if (vbox1 == null)
-#endif
+                if (vboxesRef.VBox1.isDummy)
                 {
                     throw new Exception(
                         "vbox1 not defined; shouldn't happen!");
                 }
 
-                lh.Add(vbox1);
+                lh.Add(vboxesRef.VBox1);
 
-#if NETCOREAPP && NET7_0_OR_GREATER
-                if (!vbox2.isDummy)
-#else
-                if (vbox2 != null)
-#endif
+                if (!vboxesRef.VBox2.isDummy)
                 {
-                    lh.Add(vbox2);
+                    lh.Add(vboxesRef.VBox2);
                     ncolors++;
                 }
                 lh.Sort(comparator);
@@ -305,22 +272,51 @@ namespace ColorThiefDotNet
             }
         }
 
-        public static CMap Quantize(byte[][] pixels, int maxcolors)
+        public static CMap Quantize(IEnumerable<int> pixelEnumerable, int maxcolors, bool ignoreWhite)
         {
             int[] histo = new int[Histosize];
+            int rmin = 1000000, rmax = 0;
+            int gmin = 1000000, gmax = 0;
+            int bmin = 1000000, bmax = 0;
 
-            foreach (var pixel in pixels)
+            int pixelLength = 0;
+
+            foreach (int pixel in pixelEnumerable)
             {
-                int rval = pixel[0] >> Rshift;
-                int gval = pixel[1] >> Rshift;
-                int bval = pixel[2] >> Rshift;
-                int index = GetColorIndex(rval, gval, bval);
-                histo[index]++;
+                byte r = (byte)pixel;
+                byte g = (byte)(pixel >> 8);
+                byte b = (byte)(pixel >> 16);
+                byte a = (byte)(pixel >> 24);
+
+                if (a < 180) continue;
+
+                if (!(ignoreWhite && r > 230 && g > 230 && b > 230))
+                {
+                    int rval = r >> Rshift;
+                    int gval = g >> Rshift;
+                    int bval = b >> Rshift;
+
+                    int index = GetColorIndex(rval, gval, bval);
+                    histo[index]++;
+
+                    if (rval < rmin) rmin = rval;
+                    if (rval > rmax) rmax = rval;
+
+                    if (gval < gmin) gmin = gval;
+                    if (gval > gmax) gmax = gval;
+
+                    if (bval < bmin) bmin = bval;
+                    if (bval > bmax) bmax = bval;
+
+                    pixelLength++;
+                }
             }
 
             // get the beginning vbox from the colors
-            VBox vbox = VboxFromPixels(pixels, histo);
-            List<VBox> pq = new List<VBox> { vbox };
+            List<VBox> pq = new List<VBox>
+            {
+                new VBox(rmin, rmax, gmin, gmax, bmin, bmax, histo) { count = pixelLength }
+            };
 
             // Round up to have the same behaviour as in JavaScript
             int target = (int)Math.Ceiling(FractByPopulation * maxcolors);

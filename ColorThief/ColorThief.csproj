@@ -4,6 +4,7 @@
 		<Platforms>x64</Platforms>
 		<Configurations>Debug;Release;Publish</Configurations>
 		<DebugType>portable</DebugType>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
