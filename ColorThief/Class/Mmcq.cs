@@ -290,7 +290,7 @@ namespace ColorThiefDotNet
 
                 if (a < 180) continue;
 
-                if (!(ignoreWhite && r > 230 && g > 230 && b > 230))
+                if (!(ignoreWhite && LumaUtils.CalculateYiqLuma(r, g, b) > LumaUtils.IgnoreWhiteThreshold))
                 {
                     int rval = r >> Rshift;
                     int gval = g >> Rshift;
