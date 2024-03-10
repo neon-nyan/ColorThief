@@ -28,7 +28,7 @@ namespace ColorThiefDotNet
         /// <returns></returns>
         public static QuantizedColor GetColor(Bitmap sourceImage, int quality = DefaultQuality, bool ignoreWhite = DefaultIgnoreWhite)
         {
-            IEnumerable<QuantizedColor> palette = GetPaletteEnumeration(sourceImage, 3, quality, ignoreWhite);
+            IEnumerable<QuantizedColor> palette = GetPaletteEnumeration(sourceImage, 256, quality, ignoreWhite);
             return new QuantizedColor(
                 Color.FromArgb(
                     255,
