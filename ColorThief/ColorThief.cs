@@ -25,7 +25,10 @@ namespace ColorThiefDotNet
         ///     likelihood that it will not be the visually most dominant color.
         /// </param>
         /// <param name="ignoreWhite">if set to <c>true</c> [ignore white].</param>
-        /// <returns></returns>
+        /// <returns>The quantized color</returns>
+#if NETCOREAPP
+        [SupportedOSPlatform("windows")]
+#endif
         public static QuantizedColor GetColor(Bitmap sourceImage, int quality = DefaultQuality, bool ignoreWhite = DefaultIgnoreWhite)
         {
             IEnumerable<QuantizedColor> palette = GetPaletteEnumeration(sourceImage, 256, quality, ignoreWhite);
@@ -39,10 +42,12 @@ namespace ColorThiefDotNet
         }
 
         /// <summary>
-        ///     Use the median cut algorithm to cluster similar colors.
+        ///     Use the median cut algorithm to cluster similar colors and return the base color from the largest cluster.
         /// </summary>
-        /// <param name="sourceImage">The source image.</param>
-        /// <param name="colorCount">The color count.</param>
+        /// <param name="bitmapBuffer">The buffer from a bitmap image.</param>
+        /// <param name="bitmapChannel">The channel count of a bitmap buffer (usually 3 for RGB and 4 for RGBA sequentially)</param>
+        /// <param name="bitmapWidth">The width of the bitmap buffer</param>
+        /// <param name="bitmapHeight">The height of the bitmap buffer</param>
         /// <param name="quality">
         ///     1 is the highest quality settings. 10 is the default. There is
         ///     a trade-off between quality and speed. The bigger the number,
@@ -50,13 +55,22 @@ namespace ColorThiefDotNet
         ///     likelihood that it will not be the visually most dominant color.
         /// </param>
         /// <param name="ignoreWhite">if set to <c>true</c> [ignore white].</param>
-        /// <returns></returns>
-        /// <code>true</code>
-        public static IEnumerable<QuantizedColor> GetPalette(Bitmap sourceImage, int colorCount = DefaultColorCount, int quality = DefaultQuality, bool ignoreWhite = DefaultIgnoreWhite) =>
-            GetPaletteEnumeration(sourceImage, colorCount, quality, ignoreWhite);
+        /// <returns>The quantized color</returns>
+        public static QuantizedColor GetColor(IntPtr bitmapBuffer, int bitmapChannel, int bitmapWidth, int bitmapHeight,
+            int quality = DefaultQuality, bool ignoreWhite = DefaultIgnoreWhite)
+        {
+            IEnumerable<QuantizedColor> palette = GetPaletteEnumeration(bitmapBuffer, bitmapChannel, bitmapWidth, bitmapHeight, 256, quality, ignoreWhite);
+            return new QuantizedColor(
+                Color.FromArgb(
+                    255,
+                    (byte)palette.Average(a => a.Color.R),
+                    (byte)palette.Average(a => a.Color.G),
+                    (byte)palette.Average(a => a.Color.B)
+                ), (int)palette.Average(a => a.Population));
+        }
 
         /// <summary>
-        ///     Use the median cut algorithm to cluster similar colors.
+        ///     Use the median cut algorithm to enumerate a cluster of similar colors.
         /// </summary>
         /// <param name="sourceImage">The source image.</param>
         /// <param name="colorCount">The color count.</param>
@@ -67,11 +81,37 @@ namespace ColorThiefDotNet
         ///     likelihood that it will not be the visually most dominant color.
         /// </param>
         /// <param name="ignoreWhite">if set to <c>true</c> [ignore white].</param>
-        /// <returns></returns>
-        /// <code>true</code>
-        private static IEnumerable<QuantizedColor> GetPaletteEnumeration(Bitmap sourceImage, int colorCount = DefaultColorCount, int quality = DefaultQuality, bool ignoreWhite = DefaultIgnoreWhite)
+        /// <returns>The enumerator of clustered quantized color</returns>
+#if NETCOREAPP
+        [SupportedOSPlatform("windows")]
+#endif
+        public static IEnumerable<QuantizedColor> GetPaletteEnumeration(Bitmap sourceImage, int colorCount = DefaultColorCount, int quality = DefaultQuality, bool ignoreWhite = DefaultIgnoreWhite)
         {
             CMap cmap = GetCMap(sourceImage, colorCount, quality, ignoreWhite);
+            return cmap.GeneratePalette();
+        }
+
+        /// <summary>
+        ///     Use the median cut algorithm to enumerate a cluster of similar colors.
+        /// </summary>
+        /// <param name="bitmapBuffer">The buffer from a bitmap image.</param>
+        /// <param name="bitmapChannel">The channel count of a bitmap buffer (usually 3 for RGB and 4 for RGBA sequentially)</param>
+        /// <param name="bitmapWidth">The width of the bitmap buffer</param>
+        /// <param name="bitmapHeight">The height of the bitmap buffer</param>
+        /// <param name="colorCount">The color count.</param>
+        /// <param name="quality">
+        ///     1 is the highest quality settings. 10 is the default. There is
+        ///     a trade-off between quality and speed. The bigger the number,
+        ///     the faster a color will be returned but the greater the
+        ///     likelihood that it will not be the visually most dominant color.
+        /// </param>
+        /// <param name="ignoreWhite">if set to <c>true</c> [ignore white].</param>
+        /// <returns>The enumerator of clustered quantized color</returns>
+        public static IEnumerable<QuantizedColor> GetPaletteEnumeration(IntPtr bitmapBuffer, int bitmapChannel, int bitmapWidth, int bitmapHeight,
+            int colorCount = DefaultColorCount, int quality = DefaultQuality, bool ignoreWhite = DefaultIgnoreWhite)
+        {
+            int bitmapStride = bitmapWidth * bitmapChannel;
+            CMap cmap = GetCMap(bitmapBuffer, bitmapChannel, bitmapStride, bitmapWidth, bitmapHeight, colorCount, quality, ignoreWhite);
             return cmap.GeneratePalette();
         }
 
@@ -87,14 +127,43 @@ namespace ColorThiefDotNet
         ///     likelihood that it will not be the visually most dominant color.
         /// </param>
         /// <param name="ignoreWhite">if set to <c>true</c> [ignore white].</param>
-        /// <returns></returns>
-        /// <code>true</code>
+        /// <returns>The list of quantized color</returns>
+#if NETCOREAPP
+        [SupportedOSPlatform("windows")]
+#endif
         public static List<QuantizedColor> GetPaletteList(Bitmap sourceImage, int colorCount = DefaultColorCount, int quality = DefaultQuality, bool ignoreWhite = DefaultIgnoreWhite)
         {
             CMap cmap = GetCMap(sourceImage, colorCount, quality, ignoreWhite);
             return cmap.GeneratePaletteList();
         }
 
+
+        /// <summary>
+        ///     Use the median cut algorithm to cluster similar colors from a bitmap buffer.
+        /// </summary>
+        /// <param name="bitmapBuffer">The buffer from a bitmap image.</param>
+        /// <param name="bitmapChannel">The channel count of a bitmap buffer (usually 3 for RGB and 4 for RGBA sequentially)</param>
+        /// <param name="bitmapWidth">The width of the bitmap buffer</param>
+        /// <param name="bitmapHeight">The height of the bitmap buffer</param>
+        /// <param name="colorCount">The color count.</param>
+        /// <param name="quality">
+        ///     1 is the highest quality settings. 10 is the default. There is
+        ///     a trade-off between quality and speed. The bigger the number,
+        ///     the faster a color will be returned but the greater the
+        ///     likelihood that it will not be the visually most dominant color.
+        /// </param>
+        /// <param name="ignoreWhite">if set to <c>true</c> [ignore white].</param>
+        /// <returns>The list of quantized color</returns>
+        public static List<QuantizedColor> GetPaletteList(IntPtr bitmapBuffer, int bitmapChannel, int bitmapWidth, int bitmapHeight, int colorCount = DefaultColorCount, int quality = DefaultQuality, bool ignoreWhite = DefaultIgnoreWhite)
+        {
+            int bitmapStride = bitmapWidth * bitmapChannel;
+            CMap cmap = GetCMap(bitmapBuffer, bitmapChannel, bitmapStride, bitmapWidth, bitmapHeight, colorCount, quality, ignoreWhite);
+            return cmap.GeneratePaletteList();
+        }
+
+#if NETCOREAPP
+        [SupportedOSPlatform("windows")]
+#endif
         private static CMap GetCMap(Bitmap sourceImage, int colorCount, int quality, bool ignoreWhite)
         {
             int _quality = quality < 1 ? DefaultQuality : quality;
@@ -103,13 +172,19 @@ namespace ColorThiefDotNet
             return Mmcq.Quantize(pixelEnumerable, _colorCount, ignoreWhite);
         }
 
+        private static CMap GetCMap(IntPtr bitmapBuffer, int bitmapChannel, int bitmapStride, int bitmapWidth, int bitmapHeight, int colorCount, int quality, bool ignoreWhite)
+        {
+            int _quality = quality < 1 ? DefaultQuality : quality;
+            int _colorCount = colorCount <= 0 ? 1 : colorCount;
+            IEnumerable<int> pixelEnumerable = EnumeratePixelsInner(bitmapBuffer, bitmapChannel, bitmapStride, bitmapWidth, bitmapHeight, _quality);
+            return Mmcq.Quantize(pixelEnumerable, _colorCount, ignoreWhite);
+        }
+
 #if NETCOREAPP
         [SupportedOSPlatform("windows")]
 #endif
         private static IEnumerable<int> EnumeratePixels(Bitmap sourceImage, int quality)
         {
-            int stepX = 0;
-
 #if NETCOREAPP
             int chanCount = sourceImage.PixelFormat switch
             {
@@ -134,40 +209,59 @@ namespace ColorThiefDotNet
             }
 #endif
             BitmapData data = sourceImage.LockBits(new Rectangle(new Point(), sourceImage.Size), ImageLockMode.ReadOnly, sourceImage.PixelFormat);
+            int bufferLength = data.Width * data.Height * chanCount;
 
+            try
+            {
+                return EnumeratePixelsInner(data.Scan0, chanCount, data.Stride, data.Width, data.Height, quality);
+            }
+            finally
+            {
+                sourceImage.UnlockBits(data);
+            }
+        }
+
+        private static IEnumerable<int> EnumeratePixelsInner(IntPtr bufferPtr, int channelCount, int stride, int width, int height, int quality)
+        {
+            int stepX = 0;
             int pixel;
             int offset;
 
-            if (chanCount == 4)
+            if (channelCount == 4)
             {
-                for (int y = 0; y < data.Height; y += quality)
+                for (int y = 0; y < height; y += quality)
                 {
-                    for (int x = stepX; x < data.Width; x += quality)
+                    for (int x = stepX; x < width; x += quality)
                     {
-                        offset = data.Stride * y + chanCount * x;
-                        pixel = GetUnsafeSinglePixelWithAlpha(data.Scan0, offset);
+                        offset = stride * y + channelCount * x;
+                        pixel = GetUnsafeSinglePixelWithAlpha(bufferPtr, offset);
 
-                        if (data.Width - x < quality) stepX = quality - (data.Width - x);
+                        if (width - x < quality) stepX = quality - (width - x);
                         yield return pixel;
                     }
                 }
             }
             else
             {
-                for (int y = 0; y < data.Height; y += quality)
+                for (int y = 0; y < height; y += quality)
                 {
-                    for (int x = stepX; x < data.Width; x += quality)
+                    for (int x = stepX; x < width; x += quality)
                     {
-                        offset = data.Stride * y + chanCount * x;
-                        pixel = GetUnsafeSinglePixel(data.Scan0, offset);
+                        offset = stride * y + channelCount * x;
+                        pixel = GetUnsafeSinglePixel(bufferPtr, offset);
 
-                        if (data.Width - x < quality) stepX = quality - (data.Width - x);
+                        if (width - x < quality) stepX = quality - (width - x);
                         yield return pixel;
                     }
                 }
             }
+        }
 
-            sourceImage.UnlockBits(data);
+        private static unsafe Span<T> CreateSpanFromIntPtr<T>(IntPtr ptr, int length)
+            where T : unmanaged
+        {
+            T* bytePtr = (T*)ptr;
+            return new Span<T>(bytePtr, length);
         }
 
         private static unsafe int GetUnsafeSinglePixel(IntPtr ptr, int offset) => *(byte*)(ptr + (offset + 2)) | (*(byte*)(ptr + (offset + 1)) << 8) | (*(byte*)(ptr + (offset + 0)) << 16) | (255 << 24);
