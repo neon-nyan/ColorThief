@@ -5,6 +5,14 @@
 		<Configurations>Debug;Release</Configurations>
 		<DebugType>portable</DebugType>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <!-- Assembly Info Properties -->
+        <AssemblyName>ColorThief</AssemblyName>
+        <ProductName>ColorThief</ProductName>
+        <Product>ColorThief</Product>
+        <Description>Color Thief for .NET</Description>
+        <Company>Collapse Launcher Team</Company>
+        <Authors>$(Company). neon-nyan, Cry0, bagusnl, shatyuka, gablm.</Authors>
+        <Copyright>Copyright 2022-2024 $(Company), Initially made by KSemenenko</Copyright>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
