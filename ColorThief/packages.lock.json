@@ -1,20 +1,20 @@
 {
   "version": 1,
   "dependencies": {
-    "net8.0": {
+    "net9.0": {
       "System.Drawing.Common": {
         "type": "Direct",
-        "requested": "[8.0.8, )",
-        "resolved": "8.0.8",
-        "contentHash": "4ZM1wvLjz9nVVExsfPAaSl/qOvU+QNedJL5rQ+2Wbow+iGeyO0e7XN07707rMBgaffEeeLrCZBwC0oHUuvRdPw==",
+        "requested": "[9.0.0-rc.1.24451.1, )",
+        "resolved": "9.0.0-rc.1.24451.1",
+        "contentHash": "5TJtJLhJk7viKkkflNYN+V+Tl/qxoKrkmCTog2j0dzqamIY/ximaAWQfPznYOUR5852XxxvhZsQLd2LzjJFWUw==",
         "dependencies": {
-          "Microsoft.Win32.SystemEvents": "8.0.0"
+          "Microsoft.Win32.SystemEvents": "9.0.0-rc.1.24431.7"
         }
       },
       "Microsoft.Win32.SystemEvents": {
         "type": "Transitive",
-        "resolved": "8.0.0",
-        "contentHash": "9opKRyOKMCi2xJ7Bj7kxtZ1r9vbzosMvRrdEhVhDz8j8MoBGgB+WmC94yH839NPH+BclAjtQ/pyagvi/8gDLkw=="
+        "resolved": "9.0.0-rc.1.24431.7",
+        "contentHash": "IK3fwmfSCVArYWKjPUTEeD9nRXF1VENiFb4+hlqWuUxfP1hPVw41y/sOEdLZtRB+BVdgh6NaZjetrVhEuG4Iyg=="
       }
     }
   }
