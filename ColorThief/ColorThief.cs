@@ -12,7 +12,6 @@ namespace ColorThiefDotNet
         private const int DefaultColorCount = 5;
         private const int DefaultQuality = 10;
         private const bool DefaultIgnoreWhite = true;
-        private const int ColorDepth = 3;
 
         /// <summary>
         ///     Use the median cut algorithm to cluster similar colors and return the base color from the largest cluster.
@@ -31,14 +30,17 @@ namespace ColorThiefDotNet
 #endif
         public static QuantizedColor GetColor(Bitmap sourceImage, int quality = DefaultQuality, bool ignoreWhite = DefaultIgnoreWhite)
         {
-            IEnumerable<QuantizedColor> palette = GetPaletteEnumeration(sourceImage, 256, quality, ignoreWhite);
-            return new QuantizedColor(
-                Color.FromArgb(
-                    255,
-                    (byte)palette.Average(a => a.Color.R),
-                    (byte)palette.Average(a => a.Color.G),
-                    (byte)palette.Average(a => a.Color.B)
-                ), (int)palette.Average(a => a.Population));
+            IEnumerable<QuantizedColor> palette         = GetPaletteEnumeration(sourceImage, byte.MaxValue, quality, ignoreWhite);
+            QuantizedColor[]            quantizedColors = palette.ToArray();
+
+            int chanRAvg      = (int)quantizedColors.Average(a => a.Color.R);
+            int chanGAvg      = (int)quantizedColors.Average(a => a.Color.G);
+            int chanBAvg      = (int)quantizedColors.Average(a => a.Color.B);
+            int populationAvg = (int)quantizedColors.Average(a => a.Population);
+
+            Color color = Color.FromArgb(255, chanRAvg, chanGAvg, chanBAvg);
+
+            return new QuantizedColor(color, populationAvg);
         }
 
         /// <summary>
@@ -59,14 +61,17 @@ namespace ColorThiefDotNet
         public static QuantizedColor GetColor(IntPtr bitmapBuffer, int bitmapChannel, int bitmapWidth, int bitmapHeight,
             int quality = DefaultQuality, bool ignoreWhite = DefaultIgnoreWhite)
         {
-            IEnumerable<QuantizedColor> palette = GetPaletteEnumeration(bitmapBuffer, bitmapChannel, bitmapWidth, bitmapHeight, 256, quality, ignoreWhite);
-            return new QuantizedColor(
-                Color.FromArgb(
-                    255,
-                    (byte)palette.Average(a => a.Color.R),
-                    (byte)palette.Average(a => a.Color.G),
-                    (byte)palette.Average(a => a.Color.B)
-                ), (int)palette.Average(a => a.Population));
+            IEnumerable<QuantizedColor> palette = GetPaletteEnumeration(bitmapBuffer, bitmapChannel, bitmapWidth, bitmapHeight, byte.MaxValue, quality, ignoreWhite);
+            QuantizedColor[] quantizedColors = palette.ToArray();
+
+            int chanRAvg      = (int)quantizedColors.Average(a => a.Color.R);
+            int chanGAvg      = (int)quantizedColors.Average(a => a.Color.G);
+            int chanBAvg      = (int)quantizedColors.Average(a => a.Color.B);
+            int populationAvg = (int)quantizedColors.Average(a => a.Population);
+
+            Color color = Color.FromArgb(255, chanRAvg, chanGAvg, chanBAvg);
+
+            return new QuantizedColor(color, populationAvg);
         }
 
         /// <summary>
@@ -209,7 +214,6 @@ namespace ColorThiefDotNet
             }
 #endif
             BitmapData data = sourceImage.LockBits(new Rectangle(new Point(), sourceImage.Size), ImageLockMode.ReadOnly, sourceImage.PixelFormat);
-            int bufferLength = data.Width * data.Height * chanCount;
 
             try
             {
@@ -255,13 +259,6 @@ namespace ColorThiefDotNet
                     }
                 }
             }
-        }
-
-        private static unsafe Span<T> CreateSpanFromIntPtr<T>(IntPtr ptr, int length)
-            where T : unmanaged
-        {
-            T* bytePtr = (T*)ptr;
-            return new Span<T>(bytePtr, length);
         }
 
         private static unsafe int GetUnsafeSinglePixel(IntPtr ptr, int offset) => *(byte*)(ptr + (offset + 2)) | (*(byte*)(ptr + (offset + 1)) << 8) | (*(byte*)(ptr + (offset + 0)) << 16) | (255 << 24);
