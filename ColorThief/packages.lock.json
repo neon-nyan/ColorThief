@@ -10,17 +10,17 @@
       },
       "System.Drawing.Common": {
         "type": "Direct",
-        "requested": "[9.0.0-rc.2.24474.1, )",
-        "resolved": "9.0.0-rc.2.24474.1",
-        "contentHash": "a+wqXfOnCuBc7ql6xsCr9IJh5g4Hmm6HBOtQIW/QEuTPHc/R/zMNe6b13FSHN7goEd/0tea7p6EH0OsH3iBKCQ==",
+        "requested": "[9.0.0, )",
+        "resolved": "9.0.0",
+        "contentHash": "uoozjI3+dlgKh2onFJcz8aNLh6TRCPlLSh8Dbuljc8CdvqXrxHOVysJlrHvlsOCqceqGBR1wrMPxlnzzhynktw==",
         "dependencies": {
-          "Microsoft.Win32.SystemEvents": "9.0.0-rc.2.24473.5"
+          "Microsoft.Win32.SystemEvents": "9.0.0"
         }
       },
       "Microsoft.Win32.SystemEvents": {
         "type": "Transitive",
-        "resolved": "9.0.0-rc.2.24473.5",
-        "contentHash": "is9hwbUxr4o0jPDY5uRJTmq5RqqZVrV/OvZTt/sEC4bekBf/r1un1+SY1L9KE87QkeIkFbFzKomLivEvJ8vCbg=="
+        "resolved": "9.0.0",
+        "contentHash": "z8FfGIaoeALdD+KF44A2uP8PZIQQtDGiXsOLuN8nohbKhkyKt7zGaZb+fKiCxTuBqG22Q7myIAioSWaIcOOrOw=="
       }
     }
   }
