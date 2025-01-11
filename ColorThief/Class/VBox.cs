@@ -6,7 +6,7 @@ namespace ColorThiefDotNet
     /// <summary>
     ///     3D color space box.
     /// </summary>
-    public unsafe struct VBox
+    public struct VBox
     {
         private int avg;
         public int B1;

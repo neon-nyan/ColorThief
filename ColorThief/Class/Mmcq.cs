@@ -29,7 +29,9 @@ namespace ColorThiefDotNet
         public const double WeightLuma = 6d;
         public const double WeightPopulation = 1d;
 
+#if NETCOREAPP
         private static readonly int[] EmptyVboxLengthArray = Enumerable.Repeat(-1, VboxLength).ToArray();
+#endif
         private static readonly VBoxComparer ComparatorProduct = new VBoxComparer();
         private static readonly VBoxCountComparer ComparatorCount = new VBoxCountComparer();
 
