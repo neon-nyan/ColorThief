@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+#if !NETCOREAPP
 using System.Linq;
+#endif
 
 namespace ColorThiefDotNet
 {
