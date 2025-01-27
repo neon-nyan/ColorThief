@@ -131,7 +131,7 @@ namespace ColorThiefDotNet
         {
             int a = x.Count(false);
             int b = y.Count(false);
-            return a < b ? -1 : (a > b ? 1 : 0);
+            return a < b ? -1 : a > b ? 1 : 0;
         }
     }
 
@@ -147,7 +147,7 @@ namespace ColorThiefDotNet
             // Otherwise sort by products
             int a = aCount * aVolume;
             int b = bCount * bVolume;
-            return a < b ? -1 : (a > b ? 1 : 0);
+            return a < b ? -1 : a > b ? 1 : 0;
         }
     }
 }

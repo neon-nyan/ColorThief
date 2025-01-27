@@ -1,20 +1,17 @@
 ﻿using System;
 using System.Drawing;
+// ReSharper disable UnusedMember.Global
+// ReSharper disable InconsistentNaming
+// ReSharper disable CheckNamespace
+#pragma warning disable CA2211
 
 namespace ColorThiefDotNet
 {
-    public struct QuantizedColor
+    public struct QuantizedColor(Color color, int population)
     {
-        public QuantizedColor(Color color, int population)
-        {
-            Color = color;
-            Population = population;
-            IsDark = LumaUtils.CalculateYiqLuma(color.R, color.G, color.B) < LumaUtils.DarkThreshold;
-        }
-
-        public Color Color { get; private set; }
-        public int Population { get; private set; }
-        public bool IsDark { get; private set; }
+        public Color Color      { get; private set; } = color;
+        public int   Population { get; private set; } = population;
+        public bool  IsDark     { get; private set; } = LumaUtils.CalculateYiqLuma(color.R, color.G, color.B) < LumaUtils.DarkThreshold;
     }
 
     public static class LumaUtils
@@ -38,7 +35,7 @@ namespace ColorThiefDotNet
             double linG = sRGBtoLin(vG);
             double linB = sRGBtoLin(vB);
 
-            double y = (RCoe * linR) + (GCoe * linG) + (BCoe * linB);
+            double y = RCoe * linR + GCoe * linG + BCoe * linB;
 
             return Math.Round(y * 1000f, 2);
         }
@@ -47,8 +44,7 @@ namespace ColorThiefDotNet
         {
             if (colorChannel <= 0.04045)
                 return colorChannel / 12.92;
-            else
-                return Math.Pow((colorChannel + 0.055) / 1.055, 2.4);
+            return Math.Pow((colorChannel + 0.055) / 1.055, 2.4);
         }
 
         public static void ChangeCoeToBT709()
